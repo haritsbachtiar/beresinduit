@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark, .dark *));
+
+@theme {
+  --font-sans: 'Nunito', sans-serif;
+
+  --color-accent: #22c55e;
+  --color-accent-dark: #16a34a;
+
+  --color-dark-base: #0f0f0f;
+  --color-dark-surface: #141414;
+  --color-dark-card: #1e1e1e;
+  --color-dark-border: #2a2a2a;
+  --color-dark-text: #e5e7eb;
+  --color-dark-muted: #6b7280;
+
+  --color-light-base: #f5f7fa;
+  --color-light-surface: #eef0f4;
+  --color-light-card: #ffffff;
+  --color-light-border: #e2e8f0;
+  --color-light-text: #1a1a2e;
+  --color-light-muted: #64748b;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-family: 'Nunito', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-dark-base);
+  color: var(--color-dark-text);
+  font-family: 'Nunito', sans-serif;
+  min-height: 100dvh;
+}
+
+.light body {
+  background-color: var(--color-light-base);
+  color: var(--color-light-text);
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
