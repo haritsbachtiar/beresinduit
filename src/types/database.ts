@@ -10,6 +10,8 @@ export type Database = {
           id: string
           full_name: string | null
           avatar_url: string | null
+          onboarding_completed: boolean
+          salary_date: number | null
           created_at: string
           updated_at: string
         }
@@ -17,6 +19,8 @@ export type Database = {
           id: string
           full_name?: string | null
           avatar_url?: string | null
+          onboarding_completed?: boolean
+          salary_date?: number | null
           created_at?: string
           updated_at?: string
         }
@@ -24,9 +28,12 @@ export type Database = {
           id?: string
           full_name?: string | null
           avatar_url?: string | null
+          onboarding_completed?: boolean
+          salary_date?: number | null
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       categories: {
         Row: {
@@ -59,6 +66,7 @@ export type Database = {
           is_default?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       transactions: {
         Row: {
@@ -97,6 +105,15 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'transactions_category_id_fkey'
+            columns: ['category_id']
+            isOneToOne: false
+            referencedRelation: 'categories'
+            referencedColumns: ['id']
+          }
+        ]
       }
       budgets: {
         Row: {
@@ -126,6 +143,7 @@ export type Database = {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
     }
     Views: {
@@ -143,8 +161,10 @@ export type Database = {
           created_at: string
           updated_at: string
         }
+        Relationships: []
       }
     }
+    Functions: Record<string, never>
     Enums: {
       transaction_type: TransactionType
     }
