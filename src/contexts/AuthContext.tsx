@@ -1,18 +1,22 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import type { Profile } from '../types'
 
 type AuthState = {
   user: User | null
   session: Session | null
+  profile: Profile | null
   loading: boolean
+  profileLoading: boolean
 }
 
 type AuthActions = {
   signIn: (email: string, password: string) => Promise<string | null>
   signUp: (email: string, password: string, fullName: string) => Promise<string | null>
   signOut: () => Promise<void>
+  refreshProfile: () => Promise<void>
 }
 
 type AuthContextValue = AuthState & AuthActions
@@ -22,22 +26,48 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(false)
+
+  const fetchProfile = useCallback(async (userId: string) => {
+    setProfileLoading(true)
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+    setProfile(data ?? null)
+    setProfileLoading(false)
+  }, [])
+
+  const refreshProfile = useCallback(async () => {
+    if (user) await fetchProfile(user.id)
+  }, [user, fetchProfile])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session)
       setUser(data.session?.user ?? null)
-      setLoading(false)
+      if (data.session?.user) {
+        fetchProfile(data.session.user.id).finally(() => setLoading(false))
+      } else {
+        setLoading(false)
+      }
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
       setUser(newSession?.user ?? null)
+      if (newSession?.user) {
+        fetchProfile(newSession.user.id)
+      } else {
+        setProfile(null)
+      }
     })
 
     return () => listener.subscription.unsubscribe()
-  }, [])
+  }, [fetchProfile])
 
   async function signIn(email: string, password: string): Promise<string | null> {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -60,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ user, session, profile, loading, profileLoading, signIn, signUp, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
